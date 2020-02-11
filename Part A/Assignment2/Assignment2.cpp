@@ -7,6 +7,7 @@
 #include <string>
 #include <unistd.h>
 #include <fstream>
+#define LITERAL_SIZE 1
 
 using namespace std;
 
@@ -156,13 +157,21 @@ bool Pass2::passTwo()
 			print2[0] = '\0';
 		fprintf(output, "%s %c%c %s %s\n",word1,word2[4],word2[5],print1,print2 );
 	}
-	else
+	else if(word2[1] == 'A')
 	{
-		if(word3[1] == 'S')
-			fprintf(output, "%s 00 00 00\n",word1 );
-		else
-			fprintf(output, "%s 00 00 %s\n",word1,lit_table[((int)word3[3]-48 -1)].literal);
+		std::vector<literal_table> :: iterator i = lit_table.begin();
+		while(i != lit_table.end() && strcmp(i->lc,word1) != 0) i++;		
+		int prev_lc;
+		do
+		{
+			prev_lc = atoi(i->lc);
+			fprintf(output, "%d 00 00 %s\n",prev_lc,i->literal);
+			i++;
+		} while (i != lit_table.end() && (prev_lc + LITERAL_SIZE == atoi(i->lc)));
 	}
+	else
+		fprintf(output, "%s 00 00 00\n",word1 );
+		
 	}
 	fclose(f);
 	fclose(output);

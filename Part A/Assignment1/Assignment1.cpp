@@ -7,7 +7,7 @@
 #include <string>
 #include<unistd.h>
 #include<fstream>
-
+#define LITERAL_SIZE 1
 using namespace std;
 class Pass1 {
 private:
@@ -15,6 +15,7 @@ private:
   typedef struct mnemonic_struct{
     char code[10];
     char mnemonic_class[10];
+    int mnemonic_size;
   }mnemonic_struct;
   map<std::string,mnemonic_struct> mnemonic_codes,register_codes,conditional_codes;
   typedef struct sym_table {
@@ -94,6 +95,7 @@ int Pass1::search_symbol(char *word)
 
 void Pass1::assign_mnemonics() {
   mnemonic_struct s;
+  s.mnemonic_size = 1;
   strcpy(s.code , "01");
   strcpy(s.mnemonic_class , "AD");
   mnemonic_codes["start"] = s;
@@ -204,7 +206,7 @@ bool Pass1::passOne(){
 */
 
 
-	//part 1 from start to stop
+	//part 1 from start to end
 
 	if(fscanf(f,"%s %s %s %s",word1,word2,word3,word4) == 4)
 	{	if(strcmp(word2,"start") != 0)
@@ -264,7 +266,7 @@ bool Pass1::passOne(){
         //std::cout <<strlen(word4)<< '\n';
         for ( j = 1; j < strlen(word4); j++)
           a[j-1] = word4[j];
-        a[j - 1] = '\0';
+        a[j-1] = '\0';
 
         sscanf(a,"%d",&add);
         count = atoi(symbol_table[i].lc) + add;
@@ -285,15 +287,18 @@ bool Pass1::passOne(){
       std::cout << literal_pool[0].literal << '\n';
       strcpy(p.literal,literal_pool[0].literal);
       pool.push_back(p);
+      int lc = count;
       for (size_t i = 0; i < literal_pool.size(); i++) {
-        sprintf(l.lc,"%d",count++);
+        sprintf(l.lc,"%d",count);
+        count += LITERAL_SIZE;
         strcpy(l.literal,literal_pool[i].literal);
         lit_table.push_back(l);
       }
       display_literal_table();
       literal_pool.clear();
+      m = mnemonic_codes[word2];
+      fprintf(output, "%d (%s,%s)\n",lc,m.mnemonic_class,m.code);
       continue;
-
     }
 
     if (strcmp(word2,"stop") == 0) {
@@ -377,7 +382,6 @@ bool Pass1::passOne(){
           {
             //Handle for Literal
             std::cout << "Literal detected adding to pool" << '\n';
-
             LiteralPool l;
             l.index = lit_table.size();
             strcpy(l.literal,word4);
@@ -402,16 +406,16 @@ bool Pass1::passOne(){
       fprintf(output, "\n" );
     else
       fprintf(output, " (%s,%s)\n",o.mnemonic_class,o.code );
-    count++;
-    std::cout << "\n\n\n" << '\n';
+    count += m.mnemonic_size ;
   }
   //Handling after stop
   std::cout << "Starting Phase 2" << '\n';
   while (fscanf(f,"%s %s %s %s",word1,word2,word3,word4) == 4) {
     std::cout << "For line :" <<word1<<" "<<word2<<" "<<word3<<" "<<word4<<" "<< '\n';
+    mnemonic_struct m,n;
     if(strcmp(word1,"-") != 0)
     {
-      mnemonic_struct m,n;
+      
       int size = 0;
       int add = search_symbol(word1);
       m = mnemonic_codes[word2];
@@ -449,13 +453,16 @@ bool Pass1::passOne(){
       p.index = literal_pool[0].index;
       strcpy(p.literal,literal_pool[0].literal);
       pool.push_back(p);
+      int lc = count;
       for (size_t i = 0; i < literal_pool.size(); i++) {
-        sprintf(l.lc,"%d",count++);
+        sprintf(l.lc,"%d",count);
+        count += LITERAL_SIZE;
         strcpy(l.literal,literal_pool[i].literal);
         lit_table.push_back(l);
-        std::cout << "shifting all literals" << '\n';
       }
       literal_pool.clear();
+      m = mnemonic_codes[word2];
+      fprintf(output, "%d (%s,%s)\n",lc,m.mnemonic_class,m.code);
       break;
     }
   }

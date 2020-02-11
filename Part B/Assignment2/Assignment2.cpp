@@ -2,8 +2,8 @@
 #include <vector>
 class OptimalStorage {
 private:
-  std::vector<int> tapes;
-  std::vector<int> progs;
+  std::vector<int> tapes; //tape Sizes
+  std::vector<int> progs; //Prog Sizes
   typedef struct optimal{
     std::vector<int> tape_contents;
   }optimal;
@@ -49,49 +49,52 @@ void OptimalStorage::Combine(std::vector<int> &array,int start1,int end1,int sta
   while(j <= end2)
     temp.push_back(array[j++]);
   array.erase(array.begin()+start1,array.begin()+end2 +1);
-  for (auto i = 0; i < temp.size(); i++)
+  for (size_t i = 0; i < temp.size(); i++)
     array.insert(array.begin()+start1+i,temp[i]);
 }
 
 OptimalStorage::OptimalStorage(int num_tapes,int *tape_sizes,int num_progs,int *prog){
-  for (size_t i = 0; i < num_tapes; i++)
+  optimal O;
+  for (size_t i = 0; i < num_tapes; i++){
     tapes.push_back(tape_sizes[i]);
+    storage.push_back(O);
+  }
   for (size_t i = 0; i < num_progs; i++)
     progs.push_back(prog[i]);
+
+    std::cout << "Initial Tape status" << '\n';
+    for (size_t i = 0; i < tapes.size(); i++) {
+      std::cout << tapes[i] << '-';
+    }
 }
 
 void OptimalStorage::Optimize() {
   Mergesort();
-  std::vector<int> :: iterator j = progs.begin();
-  for (std::vector <int> :: iterator i = tapes.begin(); i != tapes.end(); i++) {
-    int cur_tape_size = *i;
-    optimal o;
-    while (j != progs.end() && cur_tape_size >= *j) {
-      o.tape_contents.push_back(*j);
-      cur_tape_size -= *j;
-      j++;
+  int j = 0;
+  int count=0;
+  for (size_t i = 0; i < progs.size() -1; i++) {
+    if(j == tapes.size()){
+      if(j == count)
+        break;
+      j = 0;
     }
-    storage.push_back(o);
-    if (j == progs.end())
-      return;
-    else
-      o.tape_contents.clear();
+    if(tapes[j] == 0)
+        count++;
+    if(progs[i] <= tapes[j]){
+      storage[j].tape_contents.push_back(progs[i]);
+      tapes[j] -= progs[i];
+      count= 0;
+    }
+    j++;
   }
-  if (j != progs.end()) {
+  if (progs.size() != 0)
     std::cout << "Number of programs exceeds disk space" << '\n';
-    storage.clear();
 
-  }
 }
 
 void OptimalStorage::displayOptimal()
 {
-  if (storage.size() == 0) {
-    std::cout << "Not Optimized yet" << '\n';
-    return;
-  }
   std::vector<int>:: iterator tape = tapes.begin();
-  //std::vector<int> response_time;
   for (std::vector<optimal>:: iterator i = storage.begin(); i != storage.end(); i++) {
     optimal o = *i;
     int sum = 0;
@@ -111,13 +114,13 @@ int main(int argc, char const *argv[]) {
   std::cin >> num_tapes;
   std::cout << "Enter Their Sizes:" << '\n';
   int tapes[num_tapes];
-  for (size_t i = 0; i < num_tapes; i++)
+  for (int i = 0; i < num_tapes; i++)
     std::cin >> tapes[i];
   std::cout << "Enter Number of Programs:";
   std::cin >> num_progs;
   std::cout << "Enter Their Sizes:" << '\n';
-  int progs[num_tapes];
-  for (size_t i = 0; i < num_progs; i++)
+  int progs[num_progs];
+  for (int i = 0; i < num_progs; i++)
     std::cin >> progs[i];
   OptimalStorage os(num_tapes,tapes,num_progs,progs);
   os.Optimize();
