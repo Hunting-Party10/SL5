@@ -39,12 +39,18 @@ public:
 
 void TravellingSalesman::displayShortest(TSPutil &solution)
 {
+    std::cout<<"Shortest Path is :"<<solution.cost<<"\n";
+    for(int i = solution.vertices.size() -1; i<0;i++)
+    {
+        std::cout<<G[solution.vertices[i]].city<<" -> ";
+    }
+    std::cout<<G[solution.vertices.size() -1 ].city<<"\n\n";
     
 }
 
 int TravellingSalesman::cost(int i,int j)
 {
-    for(int k =0; i< G[i].edges.size(); k ++)
+    for(int k =0; k< G[i].edges.size(); k ++)
         if(G[i].edges[k].index == j)
             return G[i].edges[k].weight;
     return MAX;
@@ -88,25 +94,27 @@ const int num_cities = G.size();
         }
     }
     
+
     //Tracing the possible shortest path with start vertex 
     sol.vertices.push_back(start_index);
     int min = MAX;
     int vertex = -1;
     for(int i =0;i<num_cities;i++)
     {
-        if(min > memo[num_cities][i].weight){
-            min = memo[num_cities][i].weight;
+        if(min > memo[num_cities -  1][i].weight + cost(start_index,i)){
+            sol.cost = memo[num_cities - 1][i].weight + cost(start_index,i);
             vertex = i;
         }
     }
-    sol.cost = cost(start_index,vertex);
     
-    for(int i = num_cities ;i>=0; i--)
-    {
-        sol.cost += memo[i][sol.vertices[sol.vertices.size() -1]].weight;
-        if(i != 0)
-            sol.vertices.push_back(memo[i][sol.vertices[sol.vertices.size() -1]].prev_vertex);
-    }
+    for(int i = num_cities -2 ;i >= 0; i--){
+        if(vertex == -1)
+            break;
+        std::cout<<i<< " "<<vertex<<"\n";
+//         sol.vertices.push_back(memo[i][vertex].prev_vertex);
+//         vertex = memo[i][vertex].prev_vertex;
+   }
+   std::cout<<"\n\n\n"<<sol.cost;
 }
 
 bool TravellingSalesman::solveTSP()
