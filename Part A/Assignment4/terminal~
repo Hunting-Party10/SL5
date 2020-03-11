@@ -16,3 +16,10 @@
 16 if
 17 getch
 18 return   
+19 +
+21 -
+23 *
+24 "
+25 ==
+26 printf
+27 for
