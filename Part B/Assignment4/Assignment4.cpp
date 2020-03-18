@@ -2,6 +2,7 @@
 #include<bits/stdc++.h>
 #define MAX INT_MAX
 
+using namespace std;
 class TravellingSalesman {
 private:
     typedef struct Edge
@@ -30,22 +31,24 @@ private:
 public:
     TravellingSalesman (int);
     void displayGraph();
-    bool solveTSP();
+    bool solveTSP(const int);
 	int find_city_index(const std::string &);
     void displayShortest(TSPutil &);
-    void solve(TSPutil &,int);
     int cost(int, int);
 };
 
 void TravellingSalesman::displayShortest(TSPutil &solution)
 {
     std::cout<<"Shortest Path is :"<<solution.cost<<"\n";
-    for(int i = solution.vertices.size() -1; i<0;i++)
+    for(int i = 0; i<solution.vertices.size() ;i++)
     {
-        std::cout<<G[solution.vertices[i]].city<<" -> ";
+        if(i == solution.vertices.size() -1)
+            std::cout<<G[solution.vertices[i]].city;
+        else
+            std::cout<<G[solution.vertices[i]].city<<" -> ";
     }
-    std::cout<<G[solution.vertices.size() -1 ].city<<"\n\n";
     
+    cout<<"\n\n";
 }
 
 int TravellingSalesman::cost(int i,int j)
@@ -56,135 +59,91 @@ int TravellingSalesman::cost(int i,int j)
     return MAX;
 }
 
-void TravellingSalesman::solve(TSPutil &sol,int start_index)
+bool TravellingSalesman::solveTSP(const int startVertex)
 {
-	const int num_cities = G.size();
+    const int num_cities = G.size();
+    TSPutil solution;
     MEMO memo[num_cities][num_cities];
-    
     for(int i=0;i<num_cities;i++)
         for(int j=0;j<num_cities;j++)
             memo[i][j].weight = MAX;
     
-    vector<vector<int>> vertex;
-   
-   	//Creating a list of unvisited verticies
-    for(int i = 0;i<num_cities - 1;i++)
+        
+    //Initializing every leaf of the tree    
+    vector<vector<int>> vertex(num_cities-1);
+    for(int i = 0;i<num_cities - 1;i++){
+        for(int j = 0;j<num_cities;j++)
+            if(j != startVertex)
+                vertex[i].push_back(j);
+    }
+    
+    
+    
+    for(int i = 0;i <num_cities;i++)
     {
-    	vertex.push_back(i);
-    	for(int j= 0;i<num_cities;j++)
-    		if(j != start_index)
-    			vertex[i].push_back(j);
-	}
-    	
-    
-    
-    
-    for(int i = 0; i < num_cities - 1;i++)
-    {
-    
-    	if(i == 0)
-    	{
-    		int k = 0;
-    		for(int j = 0;j<num_cities - 1; j++)
-    		{
-    			if(j == start_index)
-    				k++;
-    			remove_element(vertex[j],k);
-    			memo[i][k].weight = cost(start_index,k);
-                memo[i][k].prev_vertex = -1; //signifies last vertex before cycle			
-			}
-		}
-		else
-		{
-			for(int j = 0;j<num_cities - 1;j++)
-			{
-				for(std::vector<int > :: iterator k = vector[j].begin(); k != vector[j].end();k++)
-				{
-				
-				}
-			}
-		}
-        for(int j = 0;j < num_cities;j++)
+        if(i == 0)
         {
-            if(j != start_index)
+            for(int k =0;k<vertex.size();k++)
             {
-                if(i == 0){
-                    memo[i][j].weight = cost(start_index,j);
-                    memo[i][j].prev_vertex = -1; //signifies last vertex before cycle 
-                }
-                else
-                {
-                    int min = MAX;
-                    int prev_vertex = -1;
-                    for(int k =0; k < num_cities; k++)
-                    {
-                        if(k != start_index && cost(k,j) != MAX && min > cost(k,j) + memo[i-1][j].weight)
-                        {
-                            min = cost(k,j) + memo[i-1][k].weight;
-                            prev_vertex = k;
-                        }
-                    }
-                    memo[i][j].weight = min;
-                    memo[i][j].prev_vertex = prev_vertex;
-                }
+               memo[i][vertex[k][k]].weight = cost(startVertex,vertex[k][k]);
+               memo[i][vertex[k][k]].prev_vertex = vertex[k][k];
+               vertex[k].erase(vertex[k].begin() + k);
             }
         }
-    }
-    
-
-    //Tracing the possible shortest path with start vertex 
-    sol.vertices.push_back(start_index);
-    int min = MAX;
-    int vertex = -1;
-    for(int i =0;i<num_cities;i++)
-    {
-        if(min > memo[num_cities -  1][i].weight + cost(start_index,i)){
-            sol.cost = memo[num_cities - 1][i].weight + cost(start_index,i);
-            vertex = i;
+        else
+        {
+            int c = 0;
+            for(int k =0;k<vertex.size();k++)
+            {
+                int min = MAX;
+                int index = -1;
+                for(int j = 0;j<vertex[k].size();j++)
+                {   
+                    if(c == startVertex)
+                        c++;
+                    if(min > memo[i - 1][c].weight + cost(vertex[k][j],memo[i - 1][c].prev_vertex))
+                    {
+                        min = memo[i - 1][c].weight + cost(vertex[k][j],memo[i - 1][c].prev_vertex);
+                        index = j;
+                    }
+                }
+                memo[i][c].weight = min;
+                memo[i][c].prev_vertex = vertex[k][index];
+                vertex[k].erase(vertex[k].begin() + index);
+                c++;
+            }
+           
         }
     }
     
-    for(int i = num_cities -2 ;i >= 0; i--){
-        if(vertex == -1)
-            break;
-        std::cout<<i<< " "<<vertex<<"\n";
-//         sol.vertices.push_back(memo[i][vertex].prev_vertex);
-//         vertex = memo[i][vertex].prev_vertex;
-   }
-   std::cout<<"\n\n\n"<<sol.cost;
-}
-
-bool TravellingSalesman::solveTSP()
-{
-    const int num_cities = G.size();
-    std::vector<TSPutil> solution;
-    for(int i = 0;i < num_cities;i++)
+    for(int i =0;i<num_cities;i++)
     {
-        TSPutil sol;
-        sol.cost = 0;
-        solve(sol,i);
-        solution.push_back(sol);
-        
+        if(i == startVertex)
+            continue;
+        memo[num_cities -1][i].weight = memo[num_cities -2][i].weight + cost(memo[num_cities -2][i].prev_vertex,startVertex);
+        memo[num_cities -1][i].prev_vertex = startVertex;
     }
-
-    int min = 0;
-    for(int i =0;i<solution.size();i++){
-    	std::cout<<solution[i].cost<<"\n\n";
-        if(solution[min].cost > solution[i].cost)
-            min = i;
+    
+    int min= MAX;
+    int start = -1;
+    
+    for(int i =0;i<num_cities;i++)
+    {
+        if(min> memo[num_cities -1][i].weight)
+        {
+            min = memo[num_cities -1][i].weight;
+            start = i;
+        }
     }
-    displayShortest(solution[min]);
-  
-}
-
-void TravellingSalesman::displayGraph()
-{
-  for (std::vector<Graph> :: iterator i = G.begin() ; i != G.end(); i++){
-    std::cout << "For City "<<i->city<< '\n';
-    for(std::vector<Edge> :: iterator j = i->edges.begin(); j != i->edges.end(); j++)
-    	std::cout<<"Neighbor :"<<G[j->index].city<<" Distance :"<<j->weight<<"\n";
-    std::cout<<"\n";
-  }
+    
+    TSPutil tp;
+    tp.cost = min;
+    tp.vertices.push_back(startVertex);
+    for(int i =0;i<num_cities;i++)
+        tp.vertices.push_back(memo[i][start].prev_vertex);
+    //
+    displayShortest(tp);
+    return true;
 }
 
 TravellingSalesman::TravellingSalesman(int n)
@@ -229,8 +188,11 @@ int main()
     std::cout<<"Enter Number of Cities:";
     std::cin>>n;
     TravellingSalesman ts(n);
-    ts.displayGraph();
-    ts.solveTSP();
+    //ts.displayGraph();
+    cout<<"Enter Start City:";
+    string s;
+    cin>>s;
+    ts.solveTSP(find_city_index(s));
     return 0;
 }
 
