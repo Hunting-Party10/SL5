@@ -83,6 +83,7 @@ bool TravellingSalesman::solveTSP(const int startVertex)
     {
         if(i == 0)
         {
+            //Base Case direct assignment of last node
             for(int k =0;k<vertex.size();k++)
             {
                memo[i][vertex[k][k]].weight = cost(startVertex,vertex[k][k]);
@@ -93,10 +94,12 @@ bool TravellingSalesman::solveTSP(const int startVertex)
         else
         {
             int c = 0;
+            //For every sub tree
             for(int k =0;k<vertex.size();k++)
             {
                 int min = MAX;
                 int index = -1;
+                //finds the next min node
                 for(int j = 0;j<vertex[k].size();j++)
                 {   
                     if(c == startVertex)
@@ -118,6 +121,7 @@ bool TravellingSalesman::solveTSP(const int startVertex)
     
     for(int i =0;i<num_cities;i++)
     {
+        //Building the last node from the start vertex
         if(i == startVertex)
             continue;
         memo[num_cities -1][i].weight = memo[num_cities -2][i].weight + cost(memo[num_cities -2][i].prev_vertex,startVertex);
@@ -127,6 +131,7 @@ bool TravellingSalesman::solveTSP(const int startVertex)
     int min= MAX;
     int start = -1;
     
+    //Finds minimum path
     for(int i =0;i<num_cities;i++)
     {
         if(min> memo[num_cities -1][i].weight)
@@ -135,19 +140,33 @@ bool TravellingSalesman::solveTSP(const int startVertex)
             start = i;
         }
     }
-    
+    /*
+     * 
+     * 
+     * 
+     * Uncomment to view memo table
+    for(int i=0;i<num_cities;i++){
+        for(int j=0;j<num_cities;j++)
+            cout<<memo[i][j].weight<<"-";
+        
+        cout<<"\n";
+    }
+        
+    */
     TSPutil tp;
     tp.cost = min;
     tp.vertices.push_back(startVertex);
+    //Building path
     for(int i =0;i<num_cities;i++)
         tp.vertices.push_back(memo[i][start].prev_vertex);
-    //
+    //Display Path
     displayShortest(tp);
     return true;
 }
 
 TravellingSalesman::TravellingSalesman(int n)
 {
+    //Constructor to init
   Graph v;
   Edge e;
   for (size_t i = 0; i < n; i++){
@@ -172,6 +191,7 @@ TravellingSalesman::TravellingSalesman(int n)
 
 int TravellingSalesman::find_city_index(const std::string &city)
 {
+    //Finds index in the graph ds of the given city name
 	int i = 0;
 	for(std::vector<Graph> :: iterator vertex_iterator = G.begin(); vertex_iterator != G.end(); vertex_iterator++)
 	{

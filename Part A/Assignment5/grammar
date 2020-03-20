@@ -1,0 +1,3 @@
+Declare-Type var ;
+Type-int|float|char
+var-id,var|id
