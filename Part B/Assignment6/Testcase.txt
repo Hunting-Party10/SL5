@@ -1,0 +1,25 @@
+A
+B
+C
+D
+E
+A B 20
+A C 30
+A D 10
+A E 11
+B A 15
+B C 16
+B D 4
+B E 2
+C A 3
+C B 5
+C D 2
+C E 4
+D A 19
+D B 6
+D C 18
+D E 3
+E A 16
+E B 4
+E C 7
+E D 16
